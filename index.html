@@ -1,153 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>College Debt Visualization</title>
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      background-color: #f8f8f8;
-      margin: 0;
-      padding: 2rem;
-      text-align: center;
-    }
-    svg {
-      background-color: white;
-      border: 1px solid #ccc;
-      margin-top: 1rem;
-    }
-    #filters {
-      margin-top: 1rem;
-    }
-    select, button {
-      padding: 0.5rem;
-      font-size: 1rem;
-      margin: 0.5rem;
-    }
-  </style>
-</head>
-<body>
-  <h1>College Debt in America</h1>
-  <div id="viz"></div>
+function renderScene4(selectedMajor = "All") {
+  d3.select("#filters").style("display", "block");
+  container.select("svg").remove();
 
-  <div id="filters" style="display: none;">
-    <label for="majorFilter">Filter by Major:</label>
-    <select id="majorFilter"></select>
-  </div>
+  const svgWidth = 600;
+  const svgHeight = 300;
+  const margin = { top: 30, right: 30, bottom: 50, left: 60 };
+  const width = svgWidth - margin.left - margin.right;
+  const height = svgHeight - margin.top - margin.bottom;
 
-  <div id="controls">
-    <button id="next">Next</button>
-    <button id="reset" style="display:none;">Restart</button>
-  </div>
+  const svg = container.append("svg")
+    .attr("width", svgWidth)
+    .attr("height", svgHeight)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  <script>
-    let currentScene = 0;
-    const container = d3.select("#viz");
+  const filtered = selectedMajor === "All"
+    ? allData
+    : allData.filter(d => d.major === selectedMajor);
 
-    const allData = [
-      { major: "Engineering", debt: 25000, income: 70000 },
-      { major: "Social Work", debt: 35000, income: 35000 },
-      { major: "Business", debt: 30000, income: 60000 },
-      { major: "Art", debt: 28000, income: 32000 },
-      { major: "Education", debt: 32000, income: 40000 }
-    ];
+  if (filtered.length === 0) {
+    svg.append("text")
+      .attr("x", width / 2)
+      .attr("y", height / 2)
+      .attr("text-anchor", "middle")
+      .text("No data available for selected major.");
+    return;
+  }
 
-    function clearScene() {
-      container.html("");
-    }
+  // Scales based on filtered data
+  const xScale = d3.scaleLinear()
+    .domain([0, d3.max(filtered, d => d.income)])
+    .range([0, width]);
 
-    function renderScene0() {
-      clearScene();
-      d3.select("#filters").style("display", "none");
-      const svg = container.append("svg")
-        .attr("width", 600)
-        .attr("height", 300);
+  const yScale = d3.scaleLinear()
+    .domain([0, d3.max(filtered, d => d.debt)])
+    .range([height, 0]);
 
-      svg.append("text")
-        .attr("x", 300)
-        .attr("y", 150)
-        .attr("text-anchor", "middle")
-        .attr("font-size", "36px")
-        .attr("fill", "darkred")
-        .text("$1.7 Trillion in Student Debt");
-    }
+  // Axes
+  const xAxis = d3.axisBottom(xScale).ticks(5);
+  const yAxis = d3.axisLeft(yScale).ticks(5);
 
-    function renderScene4(selectedMajor = "All") {
-      d3.select("#filters").style("display", "block");
-      container.select("svg").remove(); // FIX: Only remove existing SVG, not the whole container
+  svg.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(xAxis);
 
-      const svg = container.append("svg")
-        .attr("width", 600)
-        .attr("height", 300);
+  svg.append("g").call(yAxis);
 
-      const filtered = selectedMajor === "All"
-        ? allData
-        : allData.filter(d => d.major === selectedMajor);
+  // Axes labels
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height + 40)
+    .attr("text-anchor", "middle")
+    .text("Median Income");
 
-      if (filtered.length === 0) {
-        svg.append("text")
-          .attr("x", 300)
-          .attr("y", 150)
-          .attr("text-anchor", "middle")
-          .attr("font-size", "18px")
-          .attr("fill", "gray")
-          .text("No data available for selected major.");
-        return;
-      }
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", -40)
+    .attr("text-anchor", "middle")
+    .text("Median Debt");
 
-      svg.selectAll("circle")
-        .data(filtered)
-        .enter()
-        .append("circle")
-        .attr("cx", d => d.income / 150)
-        .attr("cy", d => 300 - d.debt / 2)
-        .attr("r", 10)
-        .attr("fill", "darkorange")
-        .append("title")
-        .text(d => `${d.major}: $${d.debt} debt / $${d.income} income`);
-    }
-
-    function populateFilters() {
-      const select = d3.select("#majorFilter");
-      select.selectAll("option").remove();
-      select.append("option").text("All").attr("value", "All");
-      allData.forEach(d => {
-        select.append("option").text(d.major).attr("value", d.major);
-      });
-      select.on("change", function () {
-        const selected = d3.select(this).property("value");
-        renderScene4(selected); // 
-      });
-    }
-
-    function advanceScene() {
-      currentScene++;
-      if (currentScene === 1) {
-        renderScene0(); // Placeholder for Scene 1
-      } else if (currentScene === 2) {
-        renderScene0(); // Placeholder for Scene 2
-      } else if (currentScene === 3) {
-        renderScene0(); // Placeholder for Scene 3
-      } else if (currentScene === 4) {
-        populateFilters();
-        renderScene4();
-        d3.select("#next").style("display", "none");
-        d3.select("#reset").style("display", "inline-block");
-      }
-    }
-
-    function resetVisualization() {
-      currentScene = 0;
-      d3.select("#next").style("display", "inline-block");
-      d3.select("#reset").style("display", "none");
-      renderScene0();
-    }
-
-    document.getElementById("next").addEventListener("click", advanceScene);
-    document.getElementById("reset").addEventListener("click", resetVisualization);
-
-    renderScene0();
-  </script>
-</body>
-</html>
+  // Circles
+  svg.selectAll("circle")
+    .data(filtered)
+    .enter()
+    .append("circle")
+    .attr("cx", d => xScale(d.income))
+    .attr("cy", d => yScale(d.debt))
+    .attr("r", 8)
+    .attr("fill", "darkorange")
+    .append("title")
+    .text(d => `${d.major}: $${d.debt} debt / $${d.income} income`);
+}
