@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Rising Burden of College Debt</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.5.1/d3-annotation.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f8f8;
+      color: #333;
+    }
+    #container {
+      max-width: 800px;
+      margin: auto;
+      padding: 2rem;
+      text-align: center;
+    }
+    #title {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    svg {
+      background-color: white;
+      border: 1px solid #ddd;
+      margin-top: 1rem;
+    }
+    #next, #reset {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #controls {
+      margin-top: 1rem;
+    }
+    #filters label {
+      margin-right: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1 id="title">The Rising Burden of College Debt</h1>
+    <div id="viz"></div>
+    <div id="controls">
+      <button id="next">Next</button>
+      <button id="reset" style="display:none">Restart</button>
+    </div>
+    <div id="filters" style="display:none">
+      <label>Major: <select id="majorFilter"></select></label>
+    </div>
+  </div>
+
+  <script>
+    let currentScene = 0;
+    const container = d3.select("#viz");
+    const allData = [
+      { major: "Engineering", debt: 25000, income: 70000 },
+      { major: "Social Work", debt: 35000, income: 35000 },
+      { major: "Business", debt: 30000, income: 60000 },
+      { major: "Art", debt: 28000, income: 32000 },
+      { major: "Education", debt: 32000, income: 40000 }
+    ];
+
+    function clearScene() {
+      container.html("");
+    }
+
+    function renderScene0() {
+      clearScene();
+      d3.select("#filters").style("display", "none");
+      const svg = container.append("svg")
+        .attr("width", 600)
+        .attr("height", 300);
+
+      svg.append("text")
+        .attr("x", 300)
+        .attr("y", 150)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "36px")
+        .attr("fill", "darkred")
+        .text("$1.7 Trillion in Student Debt");
+    }
+
+    function renderScene1() {
+      clearScene();
+      const svg = container.append("svg")
+        .attr("width", 600)
+        .attr("height", 300);
+
+      const years = [2000, 2005, 2010, 2015, 2020, 2023];
+      const debts = [18000, 22000, 26000, 30000, 35000, 39000];
+
+      const xScale = d3.scaleLinear().domain([2000, 2023]).range([60, 540]);
+      const yScale = d3.scaleLinear().domain([15000, 40000]).range([250, 50]);
+
+      const line = d3.line()
+        .x((d, i) => xScale(years[i]))
+        .y(d => yScale(d));
+
+      svg.append("path")
+        .datum(debts)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-width", 3)
+        .attr("d", line);
+
+      svg.selectAll("circle")
+        .data(debts)
+        .enter()
+        .append("circle")
+        .attr("cx", (d, i) => xScale(years[i]))
+        .attr("cy", d => yScale(d))
+        .attr("r", 4)
+        .attr("fill", "steelblue");
+    }
+
+    function renderScene2() {
+      clearScene();
+      const svg = container.append("svg")
+        .attr("width", 600)
+        .attr("height", 300);
+
+      svg.selectAll("circle")
+        .data(allData)
+        .enter()
+        .append("circle")
+        .attr("cx", d => d.income / 150)
+        .attr("cy", d => 300 - d.debt / 2)
+        .attr("r", 8)
+        .attr("fill", "orange")
+        .append("title")
+        .text(d => `${d.major}: $${d.debt} debt / $${d.income} income`);
+    }
+
+    function renderScene3() {
+      clearScene();
+      const svg = container.append("svg")
+        .attr("width", 600)
+        .attr("height", 300);
+
+      const groups = ["Low Income", "Middle Income", "High Income"];
+      const percents = [40, 35, 25];
+
+      svg.selectAll("rect")
+        .data(percents)
+        .enter()
+        .append("rect")
+        .attr("x", (d, i) => 100 + i * 150)
+        .attr("y", d => 300 - d * 3)
+        .attr("width", 80)
+        .attr("height", d => d * 3)
+        .attr("fill", "teal");
+
+      svg.selectAll("text.label")
+        .data(groups)
+        .enter()
+        .append("text")
+        .attr("x", (d, i) => 140 + i * 150)
+        .attr("y", 290)
+        .attr("text-anchor", "middle")
+        .text(d => d);
+    }
+
+    function renderScene4() {
+      clearScene();
+      d3.select("#filters").style("display", "block");
+      const svg = container.append("svg")
+        .attr("width", 600)
+        .attr("height", 300);
+
+      const selectedMajor = d3.select("#majorFilter").property("value");
+      const filtered = selectedMajor === "All" ? allData : allData.filter(d => d.major === selectedMajor);
+
+      svg.selectAll("circle")
+        .data(filtered)
+        .enter()
+        .append("circle")
+        .attr("cx", d => d.income / 150)
+        .attr("cy", d => 300 - d.debt / 2)
+        .attr("r", 10)
+        .attr("fill", "darkorange")
+        .append("title")
+        .text(d => `${d.major}: $${d.debt} debt / $${d.income} income`);
+    }
+
+    function advanceScene() {
+      currentScene++;
+      if (currentScene === 1) renderScene1();
+      else if (currentScene === 2) renderScene2();
+      else if (currentScene === 3) renderScene3();
+      else if (currentScene === 4) {
+        populateFilters();
+        renderScene4();
+        d3.select("#next").style("display", "none");
+        d3.select("#reset").style("display", "inline-block");
+      }
+    }
+
+    function populateFilters() {
+      const select = d3.select("#majorFilter");
+      select.selectAll("option").remove();
+      select.append("option").text("All").attr("value", "All");
+      allData.forEach(d => {
+        select.append("option").text(d.major).attr("value", d.major);
+      });
+      select.on("change", renderScene4);
+    }
+
+    function resetVisualization() {
+      currentScene = 0;
+      d3.select("#next").style("display", "inline-block");
+      d3.select("#reset").style("display", "none");
+      renderScene0();
+    }
+
+    document.getElementById("next").addEventListener("click", advanceScene);
+    document.getElementById("reset").addEventListener("click", resetVisualization);
+    renderScene0();
+  </script>
+</body>
+</html>
