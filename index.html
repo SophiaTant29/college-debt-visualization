@@ -74,8 +74,8 @@
     }
 
     function renderScene4(selectedMajor = "All") {
-      clearScene();
       d3.select("#filters").style("display", "block");
+      container.select("svg").remove(); // FIX: Only remove existing SVG, not the whole container
 
       const svg = container.append("svg")
         .attr("width", 600)
@@ -84,6 +84,17 @@
       const filtered = selectedMajor === "All"
         ? allData
         : allData.filter(d => d.major === selectedMajor);
+
+      if (filtered.length === 0) {
+        svg.append("text")
+          .attr("x", 300)
+          .attr("y", 150)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "18px")
+          .attr("fill", "gray")
+          .text("No data available for selected major.");
+        return;
+      }
 
       svg.selectAll("circle")
         .data(filtered)
@@ -106,21 +117,18 @@
       });
       select.on("change", function () {
         const selected = d3.select(this).property("value");
-        renderScene4(selected);
+        renderScene4(selected); // 
       });
     }
 
     function advanceScene() {
       currentScene++;
       if (currentScene === 1) {
-        // Scene 1 goes here (e.g., line chart) – omitted for brevity
-        renderScene0();
+        renderScene0(); // Placeholder for Scene 1
       } else if (currentScene === 2) {
-        // Scene 2 (scatterplot) – omitted
-        renderScene0();
+        renderScene0(); // Placeholder for Scene 2
       } else if (currentScene === 3) {
-        // Scene 3 (bar chart) – omitted
-        renderScene0();
+        renderScene0(); // Placeholder for Scene 3
       } else if (currentScene === 4) {
         populateFilters();
         renderScene4();
