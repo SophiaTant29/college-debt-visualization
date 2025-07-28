@@ -94,13 +94,20 @@
       clearScene();
       const svg = container.append("svg")
         .attr("width", 600)
-        .attr("height", 300);
+        .attr("height", 350)
+        .append("g")
+        .attr("transform", "translate(50, 30)");
 
       const years = [2000, 2005, 2010, 2015, 2020, 2023];
       const debts = [18000, 22000, 26000, 30000, 35000, 39000];
+      const width = 500;
+      const height = 250;
 
-      const xScale = d3.scaleLinear().domain([2000, 2023]).range([60, 540]);
-      const yScale = d3.scaleLinear().domain([15000, 40000]).range([250, 50]);
+      const xScale = d3.scaleLinear().domain([2000, 2023]).range([0, width]);
+      const yScale = d3.scaleLinear().domain([15000, 40000]).range([height, 0]);
+
+      const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
+      const yAxis = d3.axisLeft(yScale).ticks(5).tickFormat(d => "$" + d / 1000 + "k");
 
       const line = d3.line()
         .x((d, i) => xScale(years[i]))
@@ -121,6 +128,26 @@
         .attr("cy", d => yScale(d))
         .attr("r", 4)
         .attr("fill", "steelblue");
+
+      svg.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(xAxis);
+
+      svg.append("g")
+        .call(yAxis);
+
+      svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + 40)
+        .attr("text-anchor", "middle")
+        .text("Year");
+
+      svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", -40)
+        .attr("text-anchor", "middle")
+        .text("Average Student Debt");
     }
 
     function renderScene2() {
