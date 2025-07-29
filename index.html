@@ -4,18 +4,45 @@
   <meta charset="UTF-8">
   <title>The Rising Burden of College Debt</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f8f8f8;
+      text-align: center;
+      padding: 2rem;
+    }
+    svg {
+      background-color: white;
+      border: 1px solid #ccc;
+      margin-top: 1rem;
+    }
+    #filters {
+      margin-top: 1rem;
+      display: none;
+    }
+    select, button {
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin: 0.5rem;
+    }
+  </style>
 </head>
 <body>
   <h1>The Rising Burden of College Debt</h1>
   <div id="viz"></div>
-  <div id="description" style="margin-top: 1rem; font-size: 14px; max-width: 600px; margin-left: auto; margin-right: auto; font-style: italic; color: #555;"></div>
+  <div id="filters">
+    <label for="majorFilter">Filter by Major:</label>
+    <select id="majorFilter"></select>
+  </div>
   <div>
     <button id="next">Next</button>
     <button id="reset" style="display:none;">Restart</button>
   </div>
+
   <script>
     let currentScene = 0;
     const container = d3.select("#viz");
+
     const allData = [
       { major: "Engineering", debt: 25000, income: 70000 },
       { major: "Social Work", debt: 35000, income: 35000 },
@@ -25,85 +52,243 @@
     ];
 
     function clearScene() {
-      d3.select("#filters")?.style("display", "none");
+      d3.select("#filters").style("display", "none");
       container.select("svg").remove();
     }
 
     function renderScene0() {
-  d3.select("#description").text("");
-      d3.select("#description").text("This opening slide introduces the total outstanding student debt in the U.S., setting the stage for deeper exploration.");
       clearScene();
       const svg = container.append("svg").attr("width", 600).attr("height", 300);
-      svg.append("text").attr("x", 300).attr("y", 150).attr("text-anchor", "middle").attr("font-size", "36px").attr("fill", "darkred").text("$1.7 Trillion in Student Debt");
+      svg.append("text")
+        .attr("x", 300)
+        .attr("y", 150)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "36px")
+        .attr("fill", "darkred")
+        .text("$1.7 Trillion in Student Debt");
     }
+function renderScene1() {
+  clearScene();
 
-    function renderScene1() {
-  d3.select("#description").text("Student debt has steadily increased over the last two decades. This chart shows the average loan balance held by borrowers over time.");
-      d3.select("#description").text("Student debt has steadily increased over the last two decades. This chart shows the average loan balance held by borrowers over time.");
-      clearScene();
-      const svg = container.append("svg").attr("width", 600).attr("height", 350).append("g").attr("transform", "translate(50,30)");
-      const years = [2000, 2005, 2010, 2015, 2020, 2023];
-      const debts = [18000, 22000, 26000, 30000, 35000, 39000];
-      const width = 500, height = 250;
-      const x = d3.scaleLinear().domain([2000, 2023]).range([0, width]);
-      const y = d3.scaleLinear().domain([15000, 40000]).range([height, 0]);
-      const line = d3.line().x((d,i) => x(years[i])).y(d => y(d));
-      svg.append("path").datum(debts).attr("fill","none").attr("stroke","steelblue").attr("stroke-width",3).attr("d",line);
-      svg.append("g").attr("transform",`translate(0,${height})`).call(d3.axisBottom(x).tickFormat(d3.format("d")));
-      svg.append("g").call(d3.axisLeft(y).tickFormat(d => `$${d/1000}k`));
-      <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>The Rising Burden of College Debt</title>
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-</head>
-<body>
-  <h1>The Rising Burden of College Debt</h1>
-  <div id="viz"></div>
-  <div id="description" style="margin-top: 1rem; font-size: 14px; max-width: 600px; margin-left: auto; margin-right: auto; font-style: italic; color: #555;"></div>
-  <div>
-    <button id="next">Next</button>
-    <button id="reset" style="display:none;">Restart</button>
-  </div>
-  <script>
-    let currentScene = 0;
-    const container = d3.select("#viz");
-    const allData = [
-      { major: "Engineering", debt: 25000, income: 70000 },
-      { major: "Social Work", debt: 35000, income: 35000 },
-      { major: "Business", debt: 30000, income: 60000 },
-      { major: "Art", debt: 28000, income: 32000 },
-      { major: "Education", debt: 32000, income: 40000 }
-    ];
+  const svgWidth = 600;
+  const svgHeight = 350;
+  const margin = { top: 40, right: 30, bottom: 50, left: 60 };
+  const width = svgWidth - margin.left - margin.right;
+  const height = svgHeight - margin.top - margin.bottom;
 
-    function clearScene() {
-      d3.select("#filters")?.style("display", "none");
+  const svg = container.append("svg")
+    .attr("width", svgWidth)
+    .attr("height", svgHeight)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const years = [2000, 2005, 2010, 2015, 2020, 2023];
+  const debts = [18000, 22000, 26000, 30000, 35000, 39000];
+
+  const x = d3.scaleLinear()
+    .domain([2000, 2023])
+    .range([0, width]);
+
+  const y = d3.scaleLinear()
+    .domain([15000, 40000])
+    .range([height, 0]);
+
+  const line = d3.line()
+    .x((d, i) => x(years[i]))
+    .y(d => y(d));
+
+  // Line path
+  svg.append("path")
+    .datum(debts)
+    .attr("fill", "none")
+    .attr("stroke", "steelblue")
+    .attr("stroke-width", 3)
+    .attr("d", line);
+
+  // Axes
+  svg.append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+
+  svg.append("g")
+    .call(d3.axisLeft(y).tickFormat(d => `$${d / 1000}k`));
+
+  // Axis labels
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height + 40)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "12px")
+    .text("Year");
+
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", -45)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "12px")
+    .text("Average Student Debt ($)");
+
+  // Chart Title (optional)
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", -10)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "16px")
+    .attr("font-weight", "bold")
+    .text("Average Student Debt Over Time");
+}
+
+   function renderScene2() {
+  clearScene();
+
+  const svgWidth = 600;
+  const svgHeight = 300;
+  const margin = { top: 40, right: 30, bottom: 50, left: 60 };
+  const width = svgWidth - margin.left - margin.right;
+  const height = svgHeight - margin.top - margin.bottom;
+
+  const svg = container.append("svg")
+    .attr("width", svgWidth)
+    .attr("height", svgHeight)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const groups = ["Low Income", "Middle Income", "High Income"];
+  const percents = [40, 35, 25];
+
+  const xScale = d3.scaleBand()
+    .domain(groups)
+    .range([0, width])
+    .padding(0.3);
+
+  const yScale = d3.scaleLinear()
+    .domain([0, d3.max(percents)])
+    .range([height, 0]);
+
+  // Y-Axis
+  svg.append("g")
+    .call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d + "%"));
+
+  // X-Axis
+  svg.append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(xScale));
+
+  // Bars
+  svg.selectAll("rect")
+    .data(percents)
+    .enter()
+    .append("rect")
+    .attr("x", (d, i) => xScale(groups[i]))
+    .attr("y", d => yScale(d))
+    .attr("width", xScale.bandwidth())
+    .attr("height", d => height - yScale(d))
+    .attr("fill", "teal");
+
+  // Bar Value Labels
+  svg.selectAll("text.value")
+    .data(percents)
+    .enter()
+    .append("text")
+    .attr("x", (d, i) => xScale(groups[i]) + xScale.bandwidth() / 2)
+    .attr("y", d => yScale(d) - 5)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#333")
+    .attr("font-size", "12px")
+    .text(d => d + "%");
+
+  // Chart Title
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", -10)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "16px")
+    .attr("font-weight", "bold")
+    .text("Student Debt by Income Level");
+
+  // Y-Axis Label
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", -40)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "12px")
+    .text("% of Total Student Debt");
+}
+function renderScene3() {
+  clearScene();
+  const svgWidth = 600, svgHeight = 300, margin = { top: 40, right: 30, bottom: 50, left: 60 };
+  const width = svgWidth - margin.left - margin.right;
+  const height = svgHeight - margin.top - margin.bottom;
+
+  const svg = container.append("svg")
+    .attr("width", svgWidth).attr("height", svgHeight)
+    .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleLinear()
+    .domain([0, d3.max(allData, d => d.income)])
+    .range([0, width]);
+
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(allData, d => d.debt)])
+    .range([height, 0]);
+
+  svg.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(x));
+
+  svg.append("g")
+    .call(d3.axisLeft(y));
+
+  // Axis Labels
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height + 40)
+    .attr("text-anchor", "middle")
+    .text("Median Income");
+
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", -45)
+    .attr("text-anchor", "middle")
+    .text("Median Debt");
+
+  // Chart Title
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", -10)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "16px")
+    .attr("font-weight", "bold")
+    .text("Student Debt vs. Earnings by Major");
+
+  // Circles
+  svg.selectAll("circle")
+    .data(allData)
+    .enter()
+    .append("circle")
+    .attr("cx", d => x(d.income))
+    .attr("cy", d => y(d.debt))
+    .attr("r", 8)
+    .attr("fill", "steelblue");
+
+  // Labels (to left or right depending on design)
+  svg.selectAll("text.label")
+    .data(allData)
+    .enter()
+    .append("text")
+    .attr("x", d => x(d.income) - 12)
+    .attr("y", d => y(d.debt) + 4)
+    .attr("text-anchor", "end")
+    .attr("font-size", "12px")
+    .attr("fill", "#333")
+    .text(d => d.major);
+}
+    function renderScene4(selectedMajor = "All") {
+      d3.select("#filters").style("display", "block");
       container.select("svg").remove();
-    }
-
-    function renderScene0() {
-  d3.select("#description").text("");
-      d3.select("#description").text("This opening slide introduces the total outstanding student debt in the U.S., setting the stage for deeper exploration.");
-      clearScene();
-      const svg = container.append("svg").attr("width", 600).attr("height", 300);
-      svg.append("text").attr("x", 300).attr("y", 150).attr("text-anchor", "middle").attr("font-size", "36px").attr("fill", "darkred").text("$1.7 Trillion in Student Debt");
-    }
-
-    function renderScene1() {
-  d3.select("#description").text("Student debt has steadily increased over the last two decades. This chart shows the average loan balance held by borrowers over time.");
-      d3.select("#description").text("Student debt has steadily increased over the last two decades. This chart shows the average loan balance held by borrowers over time.");
-      clearScene();
-      const svg = container.append("svg").attr("width", 600).attr("height", 350).append("g").attr("transform", "translate(50,30)");
-      const years = [2000, 2005, 2010, 2015, 2020, 2023];
-      const debts = [18000, 22000, 26000, 30000, 35000, 39000];
-      const width = 500, height = 250;
-      const x = d3.scaleLinear().domain([2000, 2023]).range([0, width]);
-      const y = d3.scaleLinear().domain([15000, 40000]).range([height, 0]);
-      const line = d3.line().x((d,i) => x(years[i])).y(d => y(d));
-      svg.append("path").datum(debts).attr("fill","none").attr("stroke","steelblue").attr("stroke-width",3).attr("d",line);
-      svg.append("g").attr("transform",`translate(0,${height})`).call(d3.axisBottom(x).tickFormat(d3.format("d")));
-      svg.append("g").call(d3.axisLeft(y).tickFormat(d => `$${d/1000}k`));
       const svg = container.append("svg").attr("width", 600).attr("height", 300).append("g").attr("transform", "translate(50,30)");
       const data = selectedMajor === "All" ? allData : allData.filter(d => d.major === selectedMajor);
       const x = d3.scaleLinear().domain([0, d3.max(data, d => d.income)]).range([0, 500]);
