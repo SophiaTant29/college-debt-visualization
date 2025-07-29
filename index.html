@@ -164,9 +164,17 @@
         .attr("cx", d => xScale(d.income))
         .attr("cy", d => yScale(d.debt))
         .attr("r", 8)
-        .attr("fill", "steelblue")
-        .append("title")
-        .text(d => `${d.major}\nDebt: $${d.debt}\nIncome: $${d.income}`);
+        .attr("fill", "steelblue");
+
+      svg.selectAll("text.label")
+        .data(allData)
+        .enter()
+        .append("text")
+        .attr("x", d => xScale(d.income) + 10)
+        .attr("y", d => yScale(d.debt))
+        .attr("font-size", "12px")
+        .attr("fill", "#333")
+        .text(d => d.major);
     }
 
     function renderScene4(selectedMajor = "All") {
@@ -244,7 +252,7 @@
       currentScene++;
       if (currentScene === 1) renderScene1();
       else if (currentScene === 2) renderScene2();
-      else if (currentScene === 3) renderScene3(); // debt vs. earnings
+      else if (currentScene === 3) renderScene3();
       else if (currentScene === 4) {
         populateFilters();
         renderScene4();
