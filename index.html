@@ -30,13 +30,15 @@
     }
 
     function renderScene0() {
-      d3.select("#description").text("");
+  d3.select("#description").text("");
+      d3.select("#description").text("This opening slide introduces the total outstanding student debt in the U.S., setting the stage for deeper exploration.");
       clearScene();
       const svg = container.append("svg").attr("width", 600).attr("height", 300);
       svg.append("text").attr("x", 300).attr("y", 150).attr("text-anchor", "middle").attr("font-size", "36px").attr("fill", "darkred").text("$1.7 Trillion in Student Debt");
     }
 
     function renderScene1() {
+  d3.select("#description").text("Student debt has steadily increased over the last two decades. This chart shows the average loan balance held by borrowers over time.");
       d3.select("#description").text("Student debt has steadily increased over the last two decades. This chart shows the average loan balance held by borrowers over time.");
       clearScene();
       const svg = container.append("svg").attr("width", 600).attr("height", 350).append("g").attr("transform", "translate(50,30)");
@@ -49,53 +51,59 @@
       svg.append("path").datum(debts).attr("fill","none").attr("stroke","steelblue").attr("stroke-width",3).attr("d",line);
       svg.append("g").attr("transform",`translate(0,${height})`).call(d3.axisBottom(x).tickFormat(d3.format("d")));
       svg.append("g").call(d3.axisLeft(y).tickFormat(d => `$${d/1000}k`));
-      svg.append("text").attr("x", width / 2).attr("y", height + 40).attr("text-anchor", "middle").text("Year");
-      svg.append("text").attr("transform", "rotate(-90)").attr("x", -height / 2).attr("y", -40).attr("text-anchor", "middle").text("Average Student Debt ($)");
-      svg.append("text").attr("x", width / 2).attr("y", -10).attr("text-anchor", "middle").attr("font-size", "16px").attr("font-weight", "bold").text("Average Student Debt Over Time");
+      <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Rising Burden of College Debt</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <h1>The Rising Burden of College Debt</h1>
+  <div id="viz"></div>
+  <div id="description" style="margin-top: 1rem; font-size: 14px; max-width: 600px; margin-left: auto; margin-right: auto; font-style: italic; color: #555;"></div>
+  <div>
+    <button id="next">Next</button>
+    <button id="reset" style="display:none;">Restart</button>
+  </div>
+  <script>
+    let currentScene = 0;
+    const container = d3.select("#viz");
+    const allData = [
+      { major: "Engineering", debt: 25000, income: 70000 },
+      { major: "Social Work", debt: 35000, income: 35000 },
+      { major: "Business", debt: 30000, income: 60000 },
+      { major: "Art", debt: 28000, income: 32000 },
+      { major: "Education", debt: 32000, income: 40000 }
+    ];
+
+    function clearScene() {
+      d3.select("#filters")?.style("display", "none");
+      container.select("svg").remove();
     }
 
-    function renderScene2() {
-      d3.select("#description").text("Lower-income borrowers hold a disproportionately high share of total student debt. This bar chart compares debt by income level.");
+    function renderScene0() {
+  d3.select("#description").text("");
+      d3.select("#description").text("This opening slide introduces the total outstanding student debt in the U.S., setting the stage for deeper exploration.");
       clearScene();
       const svg = container.append("svg").attr("width", 600).attr("height", 300);
-      const groups = ["Low Income", "Middle Income", "High Income"];
-      const percents = [40, 35, 25];
-      svg.selectAll("rect")
-        .data(percents)
-        .enter().append("rect")
-        .attr("x", (d,i) => 100 + i*150)
-        .attr("y", d => 300 - d*3)
-        .attr("width", 80)
-        .attr("height", d => d*3)
-        .attr("fill", "teal");
+      svg.append("text").attr("x", 300).attr("y", 150).attr("text-anchor", "middle").attr("font-size", "36px").attr("fill", "darkred").text("$1.7 Trillion in Student Debt");
     }
 
-    function renderScene3() {
-      d3.select("#description").text("Not all college degrees are equal. This scatterplot shows the relationship between average debt and earnings by field of study.");
+    function renderScene1() {
+  d3.select("#description").text("Student debt has steadily increased over the last two decades. This chart shows the average loan balance held by borrowers over time.");
+      d3.select("#description").text("Student debt has steadily increased over the last two decades. This chart shows the average loan balance held by borrowers over time.");
       clearScene();
-      const svgWidth = 600, svgHeight = 300, margin = { top: 40, right: 30, bottom: 50, left: 60 };
-      const width = svgWidth - margin.left - margin.right;
-      const height = svgHeight - margin.top - margin.bottom;
-      const svg = container.append("svg")
-        .attr("width", svgWidth).attr("height", svgHeight)
-        .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-      const x = d3.scaleLinear().domain([0, d3.max(allData, d => d.income)]).range([0, width]);
-      const y = d3.scaleLinear().domain([0, d3.max(allData, d => d.debt)]).range([height, 0]);
-      svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
-      svg.append("g").call(d3.axisLeft(y));
-      svg.append("text").attr("x", width / 2).attr("y", -10).attr("text-anchor", "middle").attr("font-size", "16px").attr("font-weight", "bold").text("Student Debt vs. Earnings by Major");
-      svg.append("text").attr("x", width / 2).attr("y", height + 40).attr("text-anchor", "middle").text("Median Income");
-      svg.append("text").attr("transform", "rotate(-90)").attr("x", -height / 2).attr("y", -45).attr("text-anchor", "middle").text("Median Debt");
-      svg.selectAll("circle").data(allData).enter().append("circle").attr("cx", d => x(d.income)).attr("cy", d => y(d.debt)).attr("r", 8).attr("fill", "steelblue");
-      svg.selectAll("text.label").data(allData).enter().append("text")
-        .attr("x", d => x(d.income) - 12).attr("y", d => y(d.debt) + 4)
-        .attr("text-anchor", "end").attr("font-size", "12px").attr("fill", "#333")
-        .text(d => d.major);
-    }
-
-    function renderScene4(selectedMajor = "All") {
-      d3.select("#description").text("Use the dropdown to filter and compare student debt and income for individual majors.");
-      container.select("svg").remove();
+      const svg = container.append("svg").attr("width", 600).attr("height", 350).append("g").attr("transform", "translate(50,30)");
+      const years = [2000, 2005, 2010, 2015, 2020, 2023];
+      const debts = [18000, 22000, 26000, 30000, 35000, 39000];
+      const width = 500, height = 250;
+      const x = d3.scaleLinear().domain([2000, 2023]).range([0, width]);
+      const y = d3.scaleLinear().domain([15000, 40000]).range([height, 0]);
+      const line = d3.line().x((d,i) => x(years[i])).y(d => y(d));
+      svg.append("path").datum(debts).attr("fill","none").attr("stroke","steelblue").attr("stroke-width",3).attr("d",line);
+      svg.append("g").attr("transform",`translate(0,${height})`).call(d3.axisBottom(x).tickFormat(d3.format("d")));
+      svg.append("g").call(d3.axisLeft(y).tickFormat(d => `$${d/1000}k`));
       const svg = container.append("svg").attr("width", 600).attr("height", 300).append("g").attr("transform", "translate(50,30)");
       const data = selectedMajor === "All" ? allData : allData.filter(d => d.major === selectedMajor);
       const x = d3.scaleLinear().domain([0, d3.max(data, d => d.income)]).range([0, 500]);
