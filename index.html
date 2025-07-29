@@ -7,39 +7,32 @@
   <style>
     body {
       font-family: sans-serif;
+      background-color: #f8f8f8;
       margin: 0;
       padding: 2rem;
-      background-color: #f8f8f8;
-      color: #333;
       text-align: center;
     }
     svg {
       background-color: white;
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
       margin-top: 1rem;
-    }
-    #next, #reset {
-      margin-top: 1rem;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
     }
     #filters {
-      display: none;
       margin-top: 1rem;
+    }
+    select, button {
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin: 0.5rem;
     }
   </style>
 </head>
 <body>
   <h1>The Rising Burden of College Debt</h1>
   <div id="viz"></div>
-  <div id="filters">
-    <label>Major:
-      <select id="majorFilter"></select>
-    </label>
+  <div id="filters" style="display: none;">
+    <label for="majorFilter">Filter by Major:</label>
+    <select id="majorFilter"></select>
   </div>
   <div>
     <button id="next">Next</button>
@@ -75,48 +68,9 @@
         .text("$1.7 Trillion in Student Debt");
     }
 
-    function renderScene1() {
-      clearScene();
-      const svg = container.append("svg").attr("width", 600).attr("height", 350).append("g").attr("transform", "translate(50,30)");
-      const years = [2000, 2005, 2010, 2015, 2020, 2023];
-      const debts = [18000, 22000, 26000, 30000, 35000, 39000];
-      const width = 500, height = 250;
-      const x = d3.scaleLinear().domain([2000, 2023]).range([0, width]);
-      const y = d3.scaleLinear().domain([15000, 40000]).range([height, 0]);
-      const line = d3.line().x((d,i) => x(years[i])).y(d => y(d));
-      svg.append("path").datum(debts).attr("fill","none").attr("stroke","steelblue").attr("stroke-width",3).attr("d",line);
-      svg.append("g").attr("transform",`translate(0,${height})`).call(d3.axisBottom(x).tickFormat(d3.format("d")));
-      svg.append("g").call(d3.axisLeft(y).tickFormat(d => `$${d/1000}k`));
-      svg.append("text").attr("x", width/2).attr("y", height+40).attr("text-anchor","middle").text("Year");
-      svg.append("text").attr("transform","rotate(-90)").attr("x", -height/2).attr("y", -40).attr("text-anchor", "middle").text("Average Student Debt");
-    }
-
-    function renderScene2() {
-      clearScene();
-      const svg = container.append("svg").attr("width", 600).attr("height", 300);
-      const groups = ["Low Income", "Middle Income", "High Income"];
-      const percents = [40, 35, 25];
-      svg.selectAll("rect")
-        .data(percents)
-        .enter()
-        .append("rect")
-        .attr("x", (d,i) => 100 + i*150)
-        .attr("y", d => 300 - d*3)
-        .attr("width", 80)
-        .attr("height", d => d*3)
-        .attr("fill", "teal");
-      svg.selectAll("text")
-        .data(groups)
-        .enter()
-        .append("text")
-        .attr("x", (d,i) => 140 + i*150)
-        .attr("y", 290)
-        .attr("text-anchor", "middle")
-        .text(d => d);
-    }
-
     function renderScene3() {
       clearScene();
+
       const svgWidth = 600;
       const svgHeight = 300;
       const margin = { top: 30, right: 30, bottom: 50, left: 60 };
@@ -173,92 +127,15 @@
         .attr("x", d => xScale(d.income) + 10)
         .attr("y", d => yScale(d.debt))
         .attr("font-size", "12px")
+        .attr("class", "label")
         .attr("fill", "#333")
         .text(d => d.major);
     }
 
-    function renderScene4(selectedMajor = "All") {
-      d3.select("#filters").style("display", "block");
-      container.select("svg").remove();
-
-      const svgWidth = 600;
-      const svgHeight = 300;
-      const margin = { top: 30, right: 30, bottom: 50, left: 60 };
-      const width = svgWidth - margin.left - margin.right;
-      const height = svgHeight - margin.top - margin.bottom;
-
-      const svg = container.append("svg")
-        .attr("width", svgWidth)
-        .attr("height", svgHeight)
-        .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
-
-      const filtered = selectedMajor === "All" ? allData : allData.filter(d => d.major === selectedMajor);
-
-      const xScale = d3.scaleLinear()
-        .domain([0, d3.max(filtered, d => d.income)])
-        .range([0, width]);
-
-      const yScale = d3.scaleLinear()
-        .domain([0, d3.max(filtered, d => d.debt)])
-        .range([height, 0]);
-
-      svg.append("g")
-        .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(xScale));
-
-      svg.append("g")
-        .call(d3.axisLeft(yScale));
-
-      svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height + 40)
-        .attr("text-anchor", "middle")
-        .text("Median Income");
-
-      svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -height / 2)
-        .attr("y", -45)
-        .attr("text-anchor", "middle")
-        .text("Median Debt");
-
-      svg.selectAll("circle")
-        .data(filtered)
-        .enter()
-        .append("circle")
-        .attr("cx", d => xScale(d.income))
-        .attr("cy", d => yScale(d.debt))
-        .attr("r", 8)
-        .attr("fill", "darkorange")
-        .append("title")
-        .text(d => `${d.major}: $${d.debt} debt / $${d.income} income`);
-    }
-
-    function populateFilters() {
-      const select = d3.select("#majorFilter");
-      select.selectAll("option").remove();
-      select.append("option").text("All").attr("value", "All");
-      allData.forEach(d => {
-        select.append("option").text(d.major).attr("value", d.major);
-      });
-      select.on("change", function () {
-        const selected = d3.select(this).property("value");
-        renderScene4(selected);
-      });
-    }
-
     function advanceScene() {
       currentScene++;
-      if (currentScene === 1) renderScene1();
-      else if (currentScene === 2) renderScene2();
-      else if (currentScene === 3) renderScene3();
-      else if (currentScene === 4) {
-        populateFilters();
-        renderScene4();
-        d3.select("#next").style("display", "none");
-        d3.select("#reset").style("display", "inline-block");
-      }
+      if (currentScene === 1) renderScene3();  // Scatterplot with labels
+      else renderScene0();                     // Restart or fallback
     }
 
     function resetVisualization() {
