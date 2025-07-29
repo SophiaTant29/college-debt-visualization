@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>The Rising Burden of College Debt</title>
-  <script src="="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
       font-family: sans-serif;
@@ -93,7 +93,30 @@
 
     function renderScene2() {
       clearScene();
+      const svg = container.append("svg").attr("width", 600).attr("height", 300);
+      const groups = ["Low Income", "Middle Income", "High Income"];
+      const percents = [40, 35, 25];
+      svg.selectAll("rect")
+        .data(percents)
+        .enter()
+        .append("rect")
+        .attr("x", (d,i) => 100 + i*150)
+        .attr("y", d => 300 - d*3)
+        .attr("width", 80)
+        .attr("height", d => d*3)
+        .attr("fill", "teal");
+      svg.selectAll("text")
+        .data(groups)
+        .enter()
+        .append("text")
+        .attr("x", (d,i) => 140 + i*150)
+        .attr("y", 290)
+        .attr("text-anchor", "middle")
+        .text(d => d);
+    }
 
+    function renderScene3() {
+      clearScene();
       const svgWidth = 600;
       const svgHeight = 300;
       const margin = { top: 30, right: 30, bottom: 50, left: 60 };
@@ -144,30 +167,6 @@
         .attr("fill", "steelblue")
         .append("title")
         .text(d => `${d.major}\nDebt: $${d.debt}\nIncome: $${d.income}`);
-    }
-
-    function renderScene3() {
-      clearScene();
-      const svg = container.append("svg").attr("width", 600).attr("height", 300);
-      const groups = ["Low Income", "Middle Income", "High Income"];
-      const percents = [40, 35, 25];
-      svg.selectAll("rect")
-        .data(percents)
-        .enter()
-        .append("rect")
-        .attr("x", (d,i) => 100 + i*150)
-        .attr("y", d => 300 - d*3)
-        .attr("width", 80)
-        .attr("height", d => d*3)
-        .attr("fill", "teal");
-      svg.selectAll("text")
-        .data(groups)
-        .enter()
-        .append("text")
-        .attr("x", (d,i) => 140 + i*150)
-        .attr("y", 290)
-        .attr("text-anchor", "middle")
-        .text(d => d);
     }
 
     function renderScene4(selectedMajor = "All") {
@@ -245,7 +244,7 @@
       currentScene++;
       if (currentScene === 1) renderScene1();
       else if (currentScene === 2) renderScene2();
-      else if (currentScene === 3) renderScene3();
+      else if (currentScene === 3) renderScene3(); // debt vs. earnings
       else if (currentScene === 4) {
         populateFilters();
         renderScene4();
