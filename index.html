@@ -217,10 +217,9 @@
     .attr("font-size", "12px")
     .text("% of Total Student Debt");
 }
-
 function renderScene3() {
   clearScene();
-  const svgWidth = 600, svgHeight = 300, margin = { top: 30, right: 30, bottom: 50, left: 60 };
+  const svgWidth = 600, svgHeight = 300, margin = { top: 40, right: 30, bottom: 50, left: 60 };
   const width = svgWidth - margin.left - margin.right;
   const height = svgHeight - margin.top - margin.bottom;
 
@@ -243,6 +242,7 @@ function renderScene3() {
   svg.append("g")
     .call(d3.axisLeft(y));
 
+  // Axis Labels
   svg.append("text")
     .attr("x", width / 2)
     .attr("y", height + 40)
@@ -256,6 +256,16 @@ function renderScene3() {
     .attr("text-anchor", "middle")
     .text("Median Debt");
 
+  // Chart Title
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", -10)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "16px")
+    .attr("font-weight", "bold")
+    .text("Student Debt vs. Earnings by Major");
+
+  // Circles
   svg.selectAll("circle")
     .data(allData)
     .enter()
@@ -265,14 +275,14 @@ function renderScene3() {
     .attr("r", 8)
     .attr("fill", "steelblue");
 
-  // Labels to the left of points
+  // Labels (to left or right depending on design)
   svg.selectAll("text.label")
     .data(allData)
     .enter()
     .append("text")
-    .attr("x", d => x(d.income) - 12)  // move left of the circle
-    .attr("y", d => y(d.debt) + 4)     // vertical alignment
-    .attr("text-anchor", "end")       // right-align the text
+    .attr("x", d => x(d.income) - 12)
+    .attr("y", d => y(d.debt) + 4)
+    .attr("text-anchor", "end")
     .attr("font-size", "12px")
     .attr("fill", "#333")
     .text(d => d.major);
