@@ -69,18 +69,76 @@
     }
 
     function renderScene1() {
-      clearScene();
-      const svg = container.append("svg").attr("width", 600).attr("height", 350).append("g").attr("transform", "translate(50,30)");
-      const years = [2000, 2005, 2010, 2015, 2020, 2023];
-      const debts = [18000, 22000, 26000, 30000, 35000, 39000];
-      const width = 500, height = 250;
-      const x = d3.scaleLinear().domain([2000, 2023]).range([0, width]);
-      const y = d3.scaleLinear().domain([15000, 40000]).range([height, 0]);
-      const line = d3.line().x((d,i) => x(years[i])).y(d => y(d));
-      svg.append("path").datum(debts).attr("fill","none").attr("stroke","steelblue").attr("stroke-width",3).attr("d",line);
-      svg.append("g").attr("transform",`translate(0,${height})`).call(d3.axisBottom(x).tickFormat(d3.format("d")));
-      svg.append("g").call(d3.axisLeft(y).tickFormat(d => `$${d/1000}k`));
-    }
+  clearScene();
+
+  const svgWidth = 600;
+  const svgHeight = 350;
+  const margin = { top: 40, right: 30, bottom: 50, left: 60 };
+  const width = svgWidth - margin.left - margin.right;
+  const height = svgHeight - margin.top - margin.bottom;
+
+  const svg = container.append("svg")
+    .attr("width", svgWidth)
+    .attr("height", svgHeight)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const years = [2000, 2005, 2010, 2015, 2020, 2023];
+  const debts = [18000, 22000, 26000, 30000, 35000, 39000];
+
+  const x = d3.scaleLinear()
+    .domain([2000, 2023])
+    .range([0, width]);
+
+  const y = d3.scaleLinear()
+    .domain([15000, 40000])
+    .range([height, 0]);
+
+  const line = d3.line()
+    .x((d, i) => x(years[i]))
+    .y(d => y(d));
+
+  // Line path
+  svg.append("path")
+    .datum(debts)
+    .attr("fill", "none")
+    .attr("stroke", "steelblue")
+    .attr("stroke-width", 3)
+    .attr("d", line);
+
+  // Axes
+  svg.append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+
+  svg.append("g")
+    .call(d3.axisLeft(y).tickFormat(d => `$${d / 1000}k`));
+
+  // Axis labels
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height + 40)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "12px")
+    .text("Year");
+
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", -45)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "12px")
+    .text("Average Student Debt ($)");
+
+  // Chart Title (optional)
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", -10)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "16px")
+    .attr("font-weight", "bold")
+    .text("Average Student Debt Over Time");
+}
 
     function renderScene2() {
   clearScene();
